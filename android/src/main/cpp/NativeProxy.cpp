@@ -7,10 +7,12 @@
 #include <react/jni/ReadableNativeMap.h>
 #include <jsi/JSIDynamic.h>
 
-#if FOR_HERMES
-#import <hermes/hermes.h>
+#if JS_RUNTIME_HERMES
+#include <hermes/hermes.h>
+#elif JS_RUNTIME_V8
+#include <v8runtime/V8RuntimeFactory.h>
 #else
-#import <jsi/JSCRuntime.h>
+#include <jsi/JSCRuntime.h>
 #endif
 
 #include "NativeProxy.h"
@@ -94,8 +96,10 @@ void NativeProxy::installJSIBindings()
     scrollTo(viewTag, x, y, animated);
   };
 
-#if FOR_HERMES
+#if JS_RUNTIME_HERMES
   auto animatedRuntime = facebook::hermes::makeHermesRuntime();
+#elif JS_RUNTIME_V8
+  auto animatedRuntime = facebook::createV8Runtime("");
 #else
   auto animatedRuntime = facebook::jsc::makeJSCRuntime();
 #endif

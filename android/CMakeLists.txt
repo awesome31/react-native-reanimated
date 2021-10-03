@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5.1)
 
 set (CMAKE_VERBOSE_MAKEFILE ON)
 set (CMAKE_CXX_STANDARD 14)
-set (CMAKE_CXX_FLAGS "-DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID -DFOR_HERMES=${FOR_HERMES} -fexceptions -fno-omit-frame-pointer -frtti -Wno-sign-compare")
+set (CMAKE_CXX_FLAGS "-DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID -fexceptions -fno-omit-frame-pointer -frtti -Wno-sign-compare")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
@@ -93,6 +93,12 @@ find_library(
         NO_CMAKE_FIND_ROOT_PATH
 )
 find_library(
+        V8EXECUTOR_LIB
+        v8executor
+        PATHS ${LIBRN_DIR}
+        NO_CMAKE_FIND_ROOT_PATH
+)
+find_library(
         JSEXECUTOR_LIB
         jscexecutor
         PATHS ${LIBRN_DIR}
@@ -121,9 +127,9 @@ find_package(fbjni REQUIRED CONFIG)
 
 set_target_properties(${PACKAGE_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
-message(WARNING "CMakeLists.txt FOR_HERMES=${FOR_HERMES}")
+message(WARNING "CMakeLists.txt JS_RUNTIME=${JS_RUNTIME}")
 
-if(${FOR_HERMES})
+if(${JS_RUNTIME} STREQUAL "hermes")
     target_link_libraries(
             ${PACKAGE_NAME}
             ${LOG_LIB}
@@ -134,6 +140,25 @@ if(${FOR_HERMES})
             ${REACT_NATIVE_JNI_LIB}
             android
     )
+    string(APPEND CMAKE_CXX_FLAGS " -DJS_RUNTIME_HERMES=1")
+elseif(${JS_RUNTIME} STREQUAL "v8")
+    target_link_libraries(
+            ${PACKAGE_NAME}
+            ${LOG_LIB}
+            ${V8EXECUTOR_LIB}
+            ${GLOG_LIB}
+            fbjni::fbjni
+            ${FOLLY_JSON_LIB}
+            ${REACT_NATIVE_JNI_LIB}
+            android
+    )
+target_include_directories(
+        ${PACKAGE_NAME}
+        PRIVATE
+        "${NODE_MODULES_DIR}/react-native-v8/src"
+)
+
+    string(APPEND CMAKE_CXX_FLAGS " -DJS_RUNTIME_V8=1")
 else()
     target_link_libraries(
             ${PACKAGE_NAME}
@@ -145,6 +170,7 @@ else()
             ${REACT_NATIVE_JNI_LIB}
             android
     )
+    string(APPEND CMAKE_CXX_FLAGS " -DJS_RUNTIME_JSC=1")
 endif()
 
 if(${REACT_NATIVE_TARGET_VERSION} LESS 64)

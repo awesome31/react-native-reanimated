@@ -6,28 +6,35 @@ ROOT=$(pwd)
 
 unset CI
 
-versions=("0.65.1" "0.64.1" "0.63.3" "0.62.2 --dev")
-version_name=("65" "64" "63" "62")
+# versions=("0.65.1" "0.64.1" "0.63.3" "0.62.2 --dev")
+versions=("0.65.1" "0.64.2")
+rnv8_versions=("0.65.1-patch.1" "0.64.2-patch.1")
+version_name=("65" "64")
 
-for index in {0..3}
+# for index in {0..3}
+for index in {0..1}
 do
   yarn add react-native@"${versions[$index]}"
-  for for_hermes in "True" "False"
+  for js_runtime in "hermes" "jsc" "v8"
   do
-    engine="jsc"
-    if [ "$for_hermes" == "True" ]; then
-      engine="hermes"
+    echo "js_runtime=${js_runtime}"
+
+    if [ "${js_runtime}" == "v8" ]; then
+      yarn add react-native-v8@"${rnv8_versions[$index]}"
     fi
-    echo "engine=${engine}"
 
     cd android 
     gradle clean
 
-    FOR_HERMES=${for_hermes} gradle :assembleDebug
+    JS_RUNTIME=${js_runtime} gradle :assembleDebug
     cd $ROOT
 
-    rm -rf android-npm/react-native-reanimated-"${version_name[$index]}-${engine}".aar
-    cp android/build/outputs/aar/*.aar android-npm/react-native-reanimated-"${version_name[$index]}-${engine}".aar
+    rm -rf android-npm/react-native-reanimated-"${version_name[$index]}-${js_runtime}".aar
+    cp android/build/outputs/aar/*.aar android-npm/react-native-reanimated-"${version_name[$index]}-${js_runtime}".aar
+
+    if [ "${js_runtime}" == "v8" ]; then
+      yarn remove react-native-v8
+    fi
   done
 done
 
