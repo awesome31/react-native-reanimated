@@ -83,3 +83,5 @@ rootProject.getSubprojects().forEach({project ->
 })
 
 artifacts.add("default", file("react-native-reanimated-${minor}-${engine}.aar"))
+
+apply from: './expo/linking.gradle'
