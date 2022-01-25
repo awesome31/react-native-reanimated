@@ -180,7 +180,7 @@ elseif(${JS_RUNTIME} STREQUAL "v8")
             "${NODE_MODULES_DIR}/react-native-v8/src"
     )
 
-    string(APPEND CMAKE_CXX_FLAGS " -DJS_RUNTIME_V8=1")
+    string(APPEND CMAKE_CXX_FLAGS " -DJS_RUNTIME_V8=1 -DREACT_NATIVE_TARGET_VERSION=${REACT_NATIVE_TARGET_VERSION}")
 else()
     target_link_libraries(
             ${PACKAGE_NAME}

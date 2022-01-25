@@ -19,6 +19,7 @@ do
 
     if [ "${js_runtime}" == "v8" ]; then
       yarn add react-native-v8@"${rnv8_versions[$index]}"
+      cp -Rf node_modules/react-native-v8/src/v8runtime node_modules/react-native/ReactCommon/jsi/jsi/
     fi
 
     cd android 

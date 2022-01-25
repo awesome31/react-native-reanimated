@@ -127,8 +127,14 @@ void NativeProxy::installJSIBindings() {
   std::shared_ptr<jsi::Runtime> animatedRuntime =
       facebook::hermes::makeHermesRuntime();
 #elif JS_RUNTIME_V8
-  std::shared_ptr<jsi::Runtime> animatedRuntime =
-      facebook::createV8Runtime("");
+  #if REACT_NATIVE_TARGET_VERSION >= 65
+    V8RuntimeConfig *config = new V8RuntimeConfig();
+    config->appName = "react-native-reanimated-v8";
+    std::shared_ptr<jsi::Runtime> animatedRuntime =
+        facebook::createV8Runtime(*config);
+  #else
+    std::shared_ptr<jsi::Runtime> animatedRuntime = facebook::createV8Runtime("");
+  #endif
 #else
   std::shared_ptr<jsi::Runtime> animatedRuntime =
       facebook::jsc::makeJSCRuntime();
