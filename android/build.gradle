@@ -179,7 +179,7 @@ def detectJsRuntime() {
         return "v8"
     }
     def appProject = rootProject.getSubprojects().find { project -> project.plugins.hasPlugin("com.android.application") }
-    return appProject.ext.react.enableHermes ? "hermes" : defaultRuntimeType
+    return appProject?.ext?.react?.enableHermes ? "hermes" : defaultRuntimeType
 }
 
 def detectReanimatedConfig() {
