@@ -428,7 +428,8 @@ android {
                 "**/libreactnativejni.so",
                 "**/libjscexecutor.so",
         ]
-        pickFirst 'lib/*/libv8executor.so'
+        pickFirst "**/libv8android.so"
+        pickFirst "**/libv8executor.so"
     }
     tasks.withType(JavaCompile) {
         compileTask ->
